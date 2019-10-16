@@ -1,3 +1,17 @@
-body {
-  margin: 0;
+body,
+canvas,
+img {
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+  line-height: 1;
+}
+canvas {
+  display: inline-block;
+  max-width: 100%;
+}
+:focus {
+  outline: 0;
 }
