@@ -1,5 +1,6 @@
 import React, { useRef } from 'react'
 
+// ENUMS
 enum KEYBOARD {
   LEFT = 37,
   UP = 38,
@@ -7,6 +8,7 @@ enum KEYBOARD {
   DOWN = 40
 }
 
+// INTERFACES
 interface CanvasProps {
   width: number
   height: number
@@ -17,23 +19,32 @@ interface Position {
   y: number
 }
 
+// GAME DEFAULTS
+const BASE_GAME_SPEED: number = 150 // milliseconds. 10% faster every level.
+const BASE_GAME_BOX: number = 32
+
+// VARIABLES
 let groundLoaded: boolean = false
 let foodLoaded: boolean = false
-
-const box: number = 32
-let score: string = ''
-
+let score: number = 0
 let snake: Position[] = []
-
 snake[0] = {
-  x: 9 * box,
-  y: 9 * box
+  x: 9 * BASE_GAME_BOX,
+  y: 9 * BASE_GAME_BOX
+}
+let level: number = 1
+
+// adds 1 level every 16 apples eaten
+const updateLevel = (score: number): number => {
+  return level = Math.floor(score * 0.0625) + 1
 }
 
-let food: Position = {
-  x: Math.floor(Math.random() * 17 + 1) * box,
-  y: Math.floor(Math.random() * 15 + 3) * box
-}
+const spawnApple = (): Position => ({
+  x: Math.floor(Math.random() * 17 + 1) * BASE_GAME_BOX,
+  y: Math.floor(Math.random() * 15 + 3) * BASE_GAME_BOX
+})
+
+let apple: Position = spawnApple();
 
 const Canvas = ({ width, height }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -73,6 +84,18 @@ const Canvas = ({ width, height }: CanvasProps) => {
 
   document.addEventListener('keydown', changeDirection)
 
+  // Dificulty Management
+  const gameDificulty = (): void => {
+    level = updateLevel(score)
+    // speeds up the game every level (16 points) by 10%
+    const levelDificulty = BASE_GAME_SPEED / (1 + ((level - 1) / 10))
+
+    clearInterval(game)
+    game = setInterval(draw, levelDificulty)
+
+    console.log({ levelDificulty, level, score, snake })
+  }
+
   // Canvas Draw
   const draw = () => {
     if (!canvasRef.current) {
@@ -85,25 +108,44 @@ const Canvas = ({ width, height }: CanvasProps) => {
 
       for (let i = 0; i < snake.length; i++) {
         context.fillStyle = (i === 0) ? 'green' : 'white'
-        context.fillRect(snake[i].x, snake[i].y, box, box)
+        context.fillRect(snake[i].x, snake[i].y, BASE_GAME_BOX, BASE_GAME_BOX)
 
         context.strokeStyle = 'red'
-        context.strokeRect(snake[i].x, snake[i].y, box, box)
+        context.strokeRect(snake[i].x, snake[i].y, BASE_GAME_BOX, BASE_GAME_BOX)
       }
 
-      context.drawImage(foodImage, food.x, food.y)
+      context.drawImage(foodImage, apple.x, apple.y)
 
       // Previous Player Head Position
       let snakeX = snake[0].x
       let snakeY = snake[0].y
 
-      // Remove Snake Tail
+      // Eat the Apple
+      if (snakeX === apple.x && snakeY === apple.y) {
+
+        // Spawn new Apple
+        apple = spawnApple()
+
+        // Add score
+        ++score
+
+        // increase Snake Tail
+        snake.push({
+          x: snakeX + BASE_GAME_BOX,
+          y: snakeY + BASE_GAME_BOX
+        })
+
+        //
+        gameDificulty()
+      }
+      // Remove Snake Tail (otherwise it will increase in size at every draw)
       snake.pop()
 
-      if (playerDirection === 'LEFT') snakeX -= box
-      if (playerDirection === 'UP') snakeY -= box
-      if (playerDirection === 'RIGHT') snakeX += box
-      if (playerDirection === 'DOWN') snakeY += box
+      // Move the Head in the correct direction
+      if (playerDirection === 'LEFT') snakeX -= BASE_GAME_BOX
+      if (playerDirection === 'UP') snakeY -= BASE_GAME_BOX
+      if (playerDirection === 'RIGHT') snakeX += BASE_GAME_BOX
+      if (playerDirection === 'DOWN') snakeY += BASE_GAME_BOX
 
       // Add New Head
       let newHead: Position = {
@@ -111,17 +153,20 @@ const Canvas = ({ width, height }: CanvasProps) => {
         y: snakeY
       }
 
+      // Move Head at the new snake position
       snake.unshift(newHead)
 
-      // Check
+      // Write the Score
       context.fillStyle = 'white'
       context.font = '45px Changa one'
-      context.fillText(score, 2 * box, 1.6 * box)
+      context.fillText(String(score), 2 * BASE_GAME_BOX, 1.6 * BASE_GAME_BOX)
     }
   }
 
-  let game = setInterval(draw, 100)
+  // Start the game
+  let game = setInterval(draw, BASE_GAME_SPEED)
 
+  // Draw the Canvas
   return <canvas ref={canvasRef} height={height} width={width} />
 }
 
