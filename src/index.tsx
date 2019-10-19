@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
-import App from './App'
+import Canvas from './components/Canvas'
 
 const root: HTMLElement = document.getElementById('root')!
 
-ReactDOM.render(<App />, root)
+ReactDOM.render(<Canvas />, root)
