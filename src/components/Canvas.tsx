@@ -46,6 +46,8 @@ snake[0] = {
   y: 9 * BASE_GAME_BOX
 }
 let level: number = 1
+let xDown: number | null = null;
+let yDown: number | null = null;
 
 // adds 1 level every 16 apples eaten
 const updateLevel = (score: number): number => {
@@ -113,7 +115,62 @@ const Canvas = ({ width, height }: CanvasProps) => {
     }
   }
 
-  document.addEventListener('keydown', changeDirection)
+  // Add support for Touch
+  const getTouches = (event: TouchEvent): TouchList => {
+    return event.touches
+  }
+
+  const handleTouchStart = (event: TouchEvent): void => {
+    const firstTouch = getTouches(event)[0];
+    xDown = firstTouch.clientX;
+    yDown = firstTouch.clientY;
+  };
+
+  const handleTouchMove = (event: TouchEvent): void => {
+    if (!xDown || !yDown) {
+      return;
+    }
+
+    let xUp = event.touches[0].clientX;
+    let yUp = event.touches[0].clientY;
+
+    let xDiff = xDown - xUp;
+    let yDiff = yDown - yUp;
+
+    // check for the most significant direction
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {
+      if (xDiff > 0 && playerDirection !== 'RIGHT') {
+        left.play()
+        playerDirection = 'LEFT'
+      }
+      if (xDiff < 0 && playerDirection !== 'LEFT') {
+        right.play()
+        playerDirection = 'RIGHT'
+      }
+    } else {
+      if (yDiff > 0 && playerDirection !== 'DOWN') {
+        up.play()
+        playerDirection = 'UP'
+      }
+      if (yDiff < 0 && playerDirection !== 'UP') {
+        up.play()
+        playerDirection = 'DOWN'
+      }
+    }
+    // reset values
+    xDown = null;
+    yDown = null;
+  }
+
+  // Add Event Listeners
+  if (window.PointerEvent) {
+    // Add Pointer Event Listener
+    document.addEventListener('keydown', changeDirection)
+  } else {
+    // Add Touch Listener
+    document.addEventListener('touchstart', handleTouchStart, false);
+    document.addEventListener('touchmove', handleTouchMove, false);
+  }
 
   // Dificulty Management
   const gameDificulty = (): void => {
@@ -123,8 +180,6 @@ const Canvas = ({ width, height }: CanvasProps) => {
 
     clearInterval(game)
     game = setInterval(draw, levelDificulty)
-
-    console.log({ levelDificulty, level, score, snake })
   }
 
   // Canvas Draw
