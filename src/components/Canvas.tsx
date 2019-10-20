@@ -62,25 +62,25 @@ let apple: Position = spawnApple();
 const Canvas = ({ width, height }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const ground = new Image()
+  const ground: HTMLImageElement = new Image()
   ground.src = gameBackground
   ground.onload = function () {
     groundLoaded = true
   }
 
-  const foodImage = new Image()
+  const foodImage: HTMLImageElement = new Image()
   foodImage.src = appleImage
   foodImage.onload = function () {
     foodLoaded = true
   }
 
   // Load Audio
-  const dead = new Audio();
-  const eat = new Audio();
-  const left = new Audio();
-  const up = new Audio();
-  const right = new Audio();
-  const down = new Audio();
+  const dead: HTMLAudioElement = new Audio();
+  const eat: HTMLAudioElement = new Audio();
+  const left: HTMLAudioElement = new Audio();
+  const up: HTMLAudioElement = new Audio();
+  const right: HTMLAudioElement = new Audio();
+  const down: HTMLAudioElement = new Audio();
 
   dead.src = deadAudioFile
   eat.src = eatAudioFile
@@ -129,15 +129,20 @@ const Canvas = ({ width, height }: CanvasProps) => {
 
   // Canvas Draw
   const draw = () => {
+    // Check if the canvas has been loaded
     if (!canvasRef.current) {
       return
     }
+    // Access the canvas and context
     const canvas: HTMLCanvasElement = canvasRef.current
     const context = canvas.getContext('2d')
+
+    // Check if we have everything ready before drawing
     if (context && groundLoaded && foodLoaded) {
       context.drawImage(ground, 0, 0)
 
-      for (let i = 0; i < snake.length; i++) {
+      // Iterate through the snake, cache the length.
+      for (let i = 0, length = snake.length; i < length; ++i) {
         context.fillStyle = (i === 0) ? 'green' : 'white'
         context.fillRect(snake[i].x, snake[i].y, BASE_GAME_BOX, BASE_GAME_BOX)
 
@@ -145,9 +150,10 @@ const Canvas = ({ width, height }: CanvasProps) => {
         context.strokeRect(snake[i].x, snake[i].y, BASE_GAME_BOX, BASE_GAME_BOX)
       }
 
+      // Draw the Apple
       context.drawImage(foodImage, apple.x, apple.y)
 
-      // Previous Player Head Position
+      // Player Head Position, we're going to move it depending on the direction
       let snakeX = snake[0].x
       let snakeY = snake[0].y
 
