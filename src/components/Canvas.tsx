@@ -22,6 +22,8 @@ interface Position {
 // GAME DEFAULTS
 const BASE_GAME_SPEED: number = 150 // milliseconds. 10% faster every level.
 const BASE_GAME_BOX: number = 32
+const BASE_GAME_WIDTH: number = 17
+const BASE_GAME_HEIGHT: number = 15
 
 // VARIABLES
 let groundLoaded: boolean = false
@@ -40,8 +42,8 @@ const updateLevel = (score: number): number => {
 }
 
 const spawnApple = (): Position => ({
-  x: Math.floor(Math.random() * 17 + 1) * BASE_GAME_BOX,
-  y: Math.floor(Math.random() * 15 + 3) * BASE_GAME_BOX
+  x: Math.floor(Math.random() * BASE_GAME_WIDTH + 1) * BASE_GAME_BOX,
+  y: Math.floor(Math.random() * BASE_GAME_HEIGHT + 3) * BASE_GAME_BOX
 })
 
 let apple: Position = spawnApple();
@@ -135,9 +137,10 @@ const Canvas = ({ width, height }: CanvasProps) => {
           y: snakeY + BASE_GAME_BOX
         })
 
-        //
+        // Call the difficulty management
         gameDificulty()
       }
+
       // Remove Snake Tail (otherwise it will increase in size at every draw)
       snake.pop()
 
@@ -151,6 +154,30 @@ const Canvas = ({ width, height }: CanvasProps) => {
       let newHead: Position = {
         x: snakeX,
         y: snakeY
+      }
+
+      // Check collision within Snake body
+      const snakeAteItsBody = (): boolean => {
+        let collided = false
+        snake.forEach(bodypart => {
+          if (bodypart.x === newHead.x && bodypart.y === newHead.y) {
+            collided = true
+            return
+          }
+        })
+        return collided
+      }
+
+      // Game Over
+      if (
+        (snakeX < BASE_GAME_BOX) ||
+        (snakeX > BASE_GAME_WIDTH * BASE_GAME_BOX) ||
+        (snakeY < 3 * BASE_GAME_BOX) ||
+        (snakeY > BASE_GAME_HEIGHT * BASE_GAME_BOX + BASE_GAME_BOX * 2) ||
+        snakeAteItsBody()
+      ) {
+        console.log({ snakeX, snakeY, hpb: BASE_GAME_HEIGHT * BASE_GAME_BOX, wpb: BASE_GAME_WIDTH * BASE_GAME_BOX })
+        clearInterval(game)
       }
 
       // Move Head at the new snake position
