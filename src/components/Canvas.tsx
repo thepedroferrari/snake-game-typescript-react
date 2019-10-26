@@ -1,7 +1,17 @@
 import React, { useRef } from 'react'
 
+import {
+  BASE_GAME_SPEED,
+  BASE_GAME_BOX,
+  BASE_GAME_WIDTH,
+  BASE_GAME_HEIGHT,
+  KEYBOARD
+} from '../lib/gameDefaults'
+import { Position } from '../lib/interfaces'
+
 import appleImage from '../img/apple.png'
 import gameBackground from '../img/game-background.png'
+
 
 const deadAudioFile = require('../audio/dead.mp3')
 const eatAudioFile = require('../audio/eat.mp3')
@@ -11,30 +21,12 @@ const rightAudioFile = require('../audio/right.mp3')
 const downAudioFile = require('../audio/down.mp3')
 
 
-// ENUMS
-enum KEYBOARD {
-  LEFT = 37,
-  UP = 38,
-  RIGHT = 39,
-  DOWN = 40
-}
-
 // INTERFACES
 interface CanvasProps {
   width: number
   height: number
 }
 
-interface Position {
-  x: number
-  y: number
-}
-
-// GAME DEFAULTS
-const BASE_GAME_SPEED: number = 150 // milliseconds. 10% faster every level.
-const BASE_GAME_BOX: number = 32
-const BASE_GAME_WIDTH: number = 17
-const BASE_GAME_HEIGHT: number = 15
 
 // VARIABLES
 let groundLoaded: boolean = false
@@ -77,19 +69,12 @@ const Canvas = ({ width, height }: CanvasProps) => {
   }
 
   // Load Audio
-  const dead: HTMLAudioElement = new Audio();
-  const eat: HTMLAudioElement = new Audio();
-  const left: HTMLAudioElement = new Audio();
-  const up: HTMLAudioElement = new Audio();
-  const right: HTMLAudioElement = new Audio();
-  const down: HTMLAudioElement = new Audio();
-
-  dead.src = deadAudioFile
-  eat.src = eatAudioFile
-  left.src = leftAudioFile
-  up.src = upAudioFile
-  right.src = rightAudioFile
-  down.src = downAudioFile
+  const dead: HTMLAudioElement = new Audio(deadAudioFile);
+  const eat: HTMLAudioElement = new Audio(eatAudioFile);
+  const left: HTMLAudioElement = new Audio(leftAudioFile);
+  const up: HTMLAudioElement = new Audio(upAudioFile);
+  const right: HTMLAudioElement = new Audio(rightAudioFile);
+  const down: HTMLAudioElement = new Audio(downAudioFile);
 
   // Player Control
 
