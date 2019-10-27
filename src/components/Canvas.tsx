@@ -1,17 +1,16 @@
 import React, { useRef } from 'react'
 
 import {
-  BASE_GAME_SPEED,
   BASE_GAME_BOX,
-  BASE_GAME_WIDTH,
   BASE_GAME_HEIGHT,
+  BASE_GAME_SPEED,
+  BASE_GAME_WIDTH,
   KEYBOARD
 } from '../lib/gameDefaults'
-import { Position } from '../lib/interfaces'
+import { IPosition } from '../lib/interfaces'
 
 import appleImage from '../img/apple.png'
 import gameBackground from '../img/game-background.png'
-
 
 const deadAudioFile = require('../audio/dead.mp3')
 const eatAudioFile = require('../audio/eat.mp3')
@@ -22,17 +21,15 @@ const downAudioFile = require('../audio/down.mp3')
 
 
 // INTERFACES
-interface CanvasProps {
+interface ICanvasProps {
   width: number
   height: number
 }
 
 
 // VARIABLES
-let groundLoaded: boolean = false
-let foodLoaded: boolean = false
 let score: number = 0
-let snake: Position[] = []
+const snake: IPosition[] = []
 snake[0] = {
   x: 9 * BASE_GAME_BOX,
   y: 9 * BASE_GAME_BOX
@@ -42,31 +39,25 @@ let xDown: number | null = null;
 let yDown: number | null = null;
 
 // adds 1 level every 16 apples eaten
-const updateLevel = (score: number): number => {
-  return level = Math.floor(score * 0.0625) + 1
+const updateLevel = (s: number) => {
+  return level = Math.floor(s * 0.0625) + 1
 }
 
-const spawnApple = (): Position => ({
+const spawnApple = (): IPosition => ({
   x: Math.floor(Math.random() * BASE_GAME_WIDTH + 1) * BASE_GAME_BOX,
   y: Math.floor(Math.random() * BASE_GAME_HEIGHT + 3) * BASE_GAME_BOX
 })
 
-let apple: Position = spawnApple();
+let apple: IPosition = spawnApple();
 
-const Canvas = ({ width, height }: CanvasProps) => {
+const Canvas = ({ width, height }: ICanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const ground: HTMLImageElement = new Image()
   ground.src = gameBackground
-  ground.onload = function () {
-    groundLoaded = true
-  }
 
   const foodImage: HTMLImageElement = new Image()
   foodImage.src = appleImage
-  foodImage.onload = function () {
-    foodLoaded = true
-  }
 
   // Load Audio
   const dead: HTMLAudioElement = new Audio(deadAudioFile);
@@ -78,7 +69,7 @@ const Canvas = ({ width, height }: CanvasProps) => {
 
   // Player Control
 
-  let playerDirection: 'LEFT' | 'UP' | 'RIGHT' | 'DOWN' | undefined = undefined
+  let playerDirection: 'LEFT' | 'UP' | 'RIGHT' | 'DOWN';
   const changeDirection = (event: KeyboardEvent) => {
     const key = event.keyCode;
 
@@ -178,7 +169,7 @@ const Canvas = ({ width, height }: CanvasProps) => {
     const context = canvas.getContext('2d')
 
     // Check if we have everything ready before drawing
-    if (context && groundLoaded && foodLoaded) {
+    if (context) {
       context.drawImage(ground, 0, 0)
 
       // Iterate through the snake, cache the length.
@@ -193,7 +184,7 @@ const Canvas = ({ width, height }: CanvasProps) => {
       // Draw the Apple
       context.drawImage(foodImage, apple.x, apple.y)
 
-      // Player Head Position, we're going to move it depending on the direction
+      // Player Head IPosition, we're going to move it depending on the direction
       let snakeX = snake[0].x
       let snakeY = snake[0].y
 
@@ -223,13 +214,13 @@ const Canvas = ({ width, height }: CanvasProps) => {
       snake.pop()
 
       // Move the Head in the correct direction
-      if (playerDirection === 'LEFT') snakeX -= BASE_GAME_BOX
-      if (playerDirection === 'UP') snakeY -= BASE_GAME_BOX
-      if (playerDirection === 'RIGHT') snakeX += BASE_GAME_BOX
-      if (playerDirection === 'DOWN') snakeY += BASE_GAME_BOX
+      if (playerDirection === 'LEFT') { snakeX -= BASE_GAME_BOX }
+      if (playerDirection === 'UP') { snakeY -= BASE_GAME_BOX }
+      if (playerDirection === 'RIGHT') { snakeX += BASE_GAME_BOX }
+      if (playerDirection === 'DOWN') { snakeY += BASE_GAME_BOX }
 
       // Add New Head
-      let newHead: Position = {
+      const newHead: IPosition = {
         x: snakeX,
         y: snakeY
       }
@@ -237,12 +228,12 @@ const Canvas = ({ width, height }: CanvasProps) => {
       // Check collision within Snake body
       const snakeAteItsBody = (): boolean => {
         let collided = false
-        snake.forEach(bodypart => {
+        for (const bodypart of snake) {
           if (bodypart.x === newHead.x && bodypart.y === newHead.y) {
             collided = true
-            return
+            break
           }
-        })
+        }
         return collided
       }
 
@@ -258,7 +249,7 @@ const Canvas = ({ width, height }: CanvasProps) => {
         clearInterval(game)
       }
 
-      // Move Head at the new snake position
+      // Move Head at the new snake Position
       snake.unshift(newHead)
 
       // Write the Score
@@ -276,8 +267,8 @@ const Canvas = ({ width, height }: CanvasProps) => {
 }
 
 Canvas.defaultProps = {
-  width: window.innerWidth,
-  height: window.innerHeight
+  height: window.innerHeight,
+  width: window.innerWidth
 }
 
 export default Canvas
