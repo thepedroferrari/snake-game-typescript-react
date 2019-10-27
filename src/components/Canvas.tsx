@@ -107,11 +107,11 @@ const Canvas = ({ width, height }: ICanvasProps) => {
       return;
     }
 
-    let xUp = event.touches[0].clientX;
-    let yUp = event.touches[0].clientY;
+    const xUp = event.touches[0].clientX;
+    const yUp = event.touches[0].clientY;
 
-    let xDiff = xDown - xUp;
-    let yDiff = yDown - yUp;
+    const xDiff = xDown - xUp;
+    const yDiff = yDown - yUp;
 
     // check for the most significant direction
     if (Math.abs(xDiff) > Math.abs(yDiff)) {
@@ -123,7 +123,8 @@ const Canvas = ({ width, height }: ICanvasProps) => {
         right.play()
         playerDirection = 'RIGHT'
       }
-    } else {
+    }
+    else {
       if (yDiff > 0 && playerDirection !== 'DOWN') {
         up.play()
         playerDirection = 'UP'
@@ -177,7 +178,7 @@ const Canvas = ({ width, height }: ICanvasProps) => {
         context.fillStyle = (i === 0) ? 'green' : 'white'
         context.fillRect(snake[i].x, snake[i].y, BASE_GAME_BOX, BASE_GAME_BOX)
 
-        context.strokeStyle = 'red'
+        context.strokeStyle = 'black'
         context.strokeRect(snake[i].x, snake[i].y, BASE_GAME_BOX, BASE_GAME_BOX)
       }
 
