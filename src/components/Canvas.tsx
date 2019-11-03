@@ -4,7 +4,7 @@ import {
   GAME,
   KEYBOARD
 } from '../lib/gameDefaults'
-import { IPosition } from '../lib/interfaces'
+import { GameStatus, IPosition } from '../lib/interfaces'
 import { spawnRandomApple } from '../lib/utils'
 
 import appleImage from '../img/apple.png'
@@ -25,6 +25,7 @@ interface ICanvasProps {
 }
 
 // VARIABLES
+let gameStatus: GameStatus = 'LOADED'
 const snake: IPosition[] = []
 snake[0] = {
   x: Math.floor(GAME.WIDTH_MULTIPLIER / 2) * GAME.BOX,
@@ -35,11 +36,10 @@ let score = 0
 let level = 1
 let xDown: number | null = null
 let yDown: number | null = null
-let gameOver = false
 
 // adds 1 level every 16 apples eaten
 const updateLevel = (s: number) => {
-  return level = Math.floor(s * 0.0625) + 1
+  return Math.round(Math.floor(s * 0.0625) + 1)
 }
 
 let apple = spawnRandomApple();
@@ -57,7 +57,7 @@ const Canvas = ({ width, height }: ICanvasProps) => {
 
   let playerDirection: 'LEFT' | 'UP' | 'RIGHT' | 'DOWN';
   const changeDirection = (event: KeyboardEvent) => {
-    if (gameOver) {
+    if (gameStatus === 'OVER' || gameStatus === 'PAUSED') {
       return
     }
     const key = event.keyCode;
@@ -192,7 +192,7 @@ const Canvas = ({ width, height }: ICanvasProps) => {
     const context = canvas.getContext('2d')
 
     // Check if we have everything ready before drawing
-    if (context) {
+    if (context && gameStatus !== 'PAUSED') {
       // Player Head IPosition, we're going to move it depending on the direction
       let snakeX = snake[0].x
       let snakeY = snake[0].y
@@ -218,7 +218,6 @@ const Canvas = ({ width, height }: ICanvasProps) => {
       if (snakeX === apple.x && snakeY === apple.y) {
         eatTheApple(snakeX, snakeY)
       }
-      window.console.log({ snakeX, snakeY, appleX: apple.x, appleY: apple.y, GameBox: GAME.BOX })
       // Remove Snake Tail (otherwise it will increase in size at every draw)
       snake.pop()
 
@@ -256,16 +255,17 @@ const Canvas = ({ width, height }: ICanvasProps) => {
       ) {
         deadSound.play()
         clearInterval(game)
-        gameOver = true;
+        gameStatus = 'OVER';
       }
 
       // Move Head at the new snake Position
       snake.unshift(newHead)
 
-      // Write the Score
+      // Write the HUD
       context.fillStyle = 'white'
       context.font = '45px Changa one'
       context.fillText(String(score), 2 * GAME.BOX, 1.6 * GAME.BOX)
+      context.fillText(String(level), 4 * GAME.BOX, 1.6 * GAME.BOX)
     }
   }
 

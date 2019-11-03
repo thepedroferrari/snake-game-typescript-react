@@ -33,13 +33,6 @@ export enum GAME {
   SPEED = 150
 }
 
-window.console.log({
-  BOX: gameBox,
-  HEIGHT: GAME.HEIGHT_MULTIPLIER,
-  HEIGHT_AREA: GAME.HEIGHT_AREA,
-  WIDTH: GAME.WIDTH_MULTIPLIER,
-  WIDTH_AREA: GAME.WIDTH_AREA
-})
 // Load Audio
 const deadAudioFile = require('../audio/dead.mp3')
 const eatAudioFile = require('../audio/eat.mp3')
