@@ -4,11 +4,10 @@ import {
   GAME,
   KEYBOARD
 } from '../lib/gameDefaults'
-import { GameStatus, IPosition } from '../lib/interfaces'
+import { GameStatus, ICanvasProps, IPosition } from '../lib/interfaces'
 import { spawnRandomApple } from '../lib/utils'
 
 import appleImage from '../img/apple.png'
-import gameBackground from '../img/game-background.png'
 
 import {
   deadSound,
@@ -18,11 +17,6 @@ import {
   rightSound,
   upSound,
 } from '../lib/gameDefaults'
-
-interface ICanvasProps {
-  width: number
-  height: number
-}
 
 // VARIABLES
 let gameStatus: GameStatus = 'LOADED'
@@ -44,11 +38,8 @@ const updateLevel = (s: number) => {
 
 let apple = spawnRandomApple();
 
-const Canvas = ({ width, height }: ICanvasProps) => {
+const Snake = ({ width, height }: ICanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  const ground: HTMLImageElement = new Image()
-  ground.src = gameBackground
 
   const foodImage: HTMLImageElement = new Image()
   foodImage.src = appleImage
@@ -149,16 +140,20 @@ const Canvas = ({ width, height }: ICanvasProps) => {
   }
 
   function drawBoard(ctx: CanvasRenderingContext2D) {
+
     for (let x = 0; x <= GAME.WIDTH_AREA; x += GAME.BOX) {
       ctx.moveTo(0.5 + x + GAME.BOX, GAME.BOX);
       ctx.lineTo(0.5 + x + GAME.BOX, GAME.HEIGHT_AREA + GAME.BOX);
     }
 
     for (let x = 0; x <= GAME.HEIGHT_AREA; x += GAME.BOX) {
-      ctx.moveTo(GAME.BOX, 0.5 + x + GAME.BOX);
+      ctx.moveTo(0, 0.5 + x + GAME.BOX);
       ctx.lineTo(GAME.WIDTH_AREA + GAME.BOX, 0.5 + x + GAME.BOX);
     }
     ctx.strokeStyle = 'blue';
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(GAME.BOX * 3, GAME.BOX / 1.6, GAME.BOX / 2, 0, Math.PI * 2, true);
     ctx.stroke();
   }
 
@@ -193,12 +188,14 @@ const Canvas = ({ width, height }: ICanvasProps) => {
 
     // Check if we have everything ready before drawing
     if (context && gameStatus !== 'PAUSED') {
+      // Clear whatever we had
+      context.clearRect(0, 0, GAME.WIDTH_AREA, GAME.HEIGHT_AREA)
+
       // Player Head IPosition, we're going to move it depending on the direction
       let snakeX = snake[0].x
       let snakeY = snake[0].y
 
-      context.drawImage(ground, 0, 0)
-      context.fillStyle = 'rgba(0,0,0,.4)'
+      context.fillStyle = 'transparent'
       drawBoard(context)
       context.fillRect(0, 0, GAME.WIDTH_AREA, GAME.HEIGHT_AREA);
 
@@ -249,7 +246,7 @@ const Canvas = ({ width, height }: ICanvasProps) => {
       if (
         (snakeX < GAME.BOX) ||
         (snakeX > GAME.WIDTH_AREA) ||
-        (snakeY < 3 * GAME.BOX) ||
+        (snakeY < GAME.BOX) || // 3 * Gamebox for HUD?
         (snakeY > GAME.HEIGHT_AREA) ||
         snakeAteItsBody()
       ) {
@@ -276,9 +273,9 @@ const Canvas = ({ width, height }: ICanvasProps) => {
   return <canvas ref={canvasRef} height={height} width={width} />
 }
 
-Canvas.defaultProps = {
+Snake.defaultProps = {
   height: window.innerHeight,
   width: window.innerWidth
 }
 
-export default Canvas
+export default Snake
